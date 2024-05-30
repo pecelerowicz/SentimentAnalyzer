@@ -10,7 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 @Repository
-public class NewsApiRepository {
+public class NewsApiFreshResponseRepository {
 
     private final HttpClient httpClient;
 
@@ -43,7 +43,7 @@ public class NewsApiRepository {
         }
     }
 
-    public NewsApiRepository(HttpClient httpClient) {
+    public NewsApiFreshResponseRepository(HttpClient httpClient) {
         this.httpClient = httpClient;
     }
 }
