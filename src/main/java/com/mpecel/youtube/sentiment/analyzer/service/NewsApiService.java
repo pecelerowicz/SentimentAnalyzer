@@ -39,16 +39,17 @@ public class NewsApiService {
     }
 
     public List<NewsApiResponseWrapper> getSavedResponses(String query) {
-        List<NewsApiResponseWrapper> list = newsApiSavedResponseRepository.findByQuery(query).stream().toList();
-        System.out.println(list.size());
-        return list;
-//        return newsApiSavedResponseRepository.findByQuery(query).stream().filter(w -> w.query().equals(query)).toList();
+        return newsApiSavedResponseRepository.findByQuery(query).stream().filter(w -> w.query().equals(query)).toList();
     }
 
     public void updateSavedResponses(String query) {
         NewsApiResponse freshResponse = getFreshResponse(query);
         NewsApiResponseWrapper wrapper = new NewsApiResponseWrapper(null, query, new Date(), freshResponse);
         newsApiSavedResponseRepository.save(wrapper);
+    }
+
+    public void deleteSavedResponses() {
+        newsApiSavedResponseRepository.deleteAll();
     }
 
     public NewsApiService(NewsApiFreshResponseRepository newsApiFreshResponseRepository, NewsApiSavedResponseRepository newsApiSavedResponseRepository, ObjectMapper objectMapper) {

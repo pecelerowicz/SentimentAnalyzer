@@ -33,6 +33,11 @@ public class NewsApiController {
         newsApiService.updateSavedResponses(query);
     }
 
+    @DeleteMapping("/news/all")
+    public void deleteSavedResponses() {
+        newsApiService.deleteSavedResponses();
+    }
+
     public NewsApiController(NewsApiService newsApiService) {
         this.newsApiService = newsApiService;
     }
