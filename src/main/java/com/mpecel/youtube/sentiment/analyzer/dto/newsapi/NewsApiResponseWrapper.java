@@ -1,6 +1,5 @@
-package com.mpecel.youtube.sentiment.analyzer.mongo;
+package com.mpecel.youtube.sentiment.analyzer.dto.newsapi;
 
-import com.mpecel.youtube.sentiment.analyzer.dto.newsapi.NewsApiResponse;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 

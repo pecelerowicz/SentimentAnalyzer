@@ -2,9 +2,11 @@ package com.mpecel.youtube.sentiment.analyzer.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mpecel.youtube.sentiment.analyzer.dto.newsapi.NewsApiInfo;
 import com.mpecel.youtube.sentiment.analyzer.dto.newsapi.NewsApiResponse;
+import com.mpecel.youtube.sentiment.analyzer.dto.newsapi.NewsApiResponseSnippet;
 import com.mpecel.youtube.sentiment.analyzer.repository.NewsApiSavedResponseRepository;
-import com.mpecel.youtube.sentiment.analyzer.mongo.NewsApiResponseWrapper;
+import com.mpecel.youtube.sentiment.analyzer.dto.newsapi.NewsApiResponseWrapper;
 import com.mpecel.youtube.sentiment.analyzer.repository.NewsApiFreshResponseRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,7 +29,7 @@ public class NewsApiService {
     }
 
     // TODO napisać to ładniej
-    public NewsApiResponse getSavedResponse(String query) {
+    public NewsApiResponse getLastSavedResponse(String query) {
         List<NewsApiResponseWrapper> wrappers = newsApiSavedResponseRepository.findByQuery(query);
         List<NewsApiResponseWrapper> listOfWrappers = wrappers.stream().filter(w -> w.query().equals(query)).toList();
         if(!listOfWrappers.isEmpty()) {
@@ -42,14 +44,25 @@ public class NewsApiService {
         return newsApiSavedResponseRepository.findByQuery(query).stream().filter(w -> w.query().equals(query)).toList();
     }
 
+    // todo implement
+    public List<NewsApiResponseSnippet> getSavedResponsesSnippets(String query) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
     public void updateSavedResponses(String query) {
         NewsApiResponse freshResponse = getFreshResponse(query);
         NewsApiResponseWrapper wrapper = new NewsApiResponseWrapper(null, query, new Date(), freshResponse);
         newsApiSavedResponseRepository.save(wrapper);
     }
 
+    // todo implement
+    public NewsApiInfo getInfo() {
+        throw new RuntimeException("Not implemented yet");
+    }
+
     public void deleteSavedResponses() {
-        newsApiSavedResponseRepository.deleteAll();
+        throw new RuntimeException("Uncomment to delete");
+        //        newsApiSavedResponseRepository.deleteAll();
     }
 
     public NewsApiService(NewsApiFreshResponseRepository newsApiFreshResponseRepository, NewsApiSavedResponseRepository newsApiSavedResponseRepository, ObjectMapper objectMapper) {

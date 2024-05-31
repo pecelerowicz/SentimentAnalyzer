@@ -1,4 +1,4 @@
-package com.mpecel.youtube.sentiment.analyzer.controller;
+package com.mpecel.youtube.sentiment.analyzer.controller.youtube;
 
 import com.mpecel.youtube.sentiment.analyzer.dto.youtube.YoutubeRequest;
 import com.mpecel.youtube.sentiment.analyzer.dto.youtube.YoutubeResponse;
