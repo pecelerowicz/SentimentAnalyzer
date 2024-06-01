@@ -1,5 +1,8 @@
 package com.mpecel.youtube.sentiment.analyzer.repository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mpecel.youtube.sentiment.analyzer.repository.dto.NewsApiResponse;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -10,9 +13,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 @Repository
-public class NewsApiFreshResponseRepository {
+public class NewsApiClientRepository {
 
     private final HttpClient httpClient;
+
+    private final ObjectMapper objectMapper;
 
     @Value("${api.newsapi.url.base}")
     private String apiNewsapiUrlBase;
@@ -23,7 +28,7 @@ public class NewsApiFreshResponseRepository {
     @Value("${api.newsapi.domains}")
     private String apiNewsapiDomains;
 
-    public String getNews(String query) {
+    public NewsApiResponse getNews(String query) {
         try {
             URIBuilder uriBuilder = new URIBuilder(apiNewsapiUrlBase);
             uriBuilder.addParameter("apiKey", apiNewsapiKey);
@@ -36,14 +41,21 @@ public class NewsApiFreshResponseRepository {
                     .GET()
                     .build();
 
-            return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+            String body = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+
+            try {
+                return objectMapper.readValue(body, NewsApiResponse.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e); //TODO improve
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public NewsApiFreshResponseRepository(HttpClient httpClient) {
+    public NewsApiClientRepository(HttpClient httpClient, ObjectMapper objectMapper) {
         this.httpClient = httpClient;
+        this.objectMapper = objectMapper;
     }
 }

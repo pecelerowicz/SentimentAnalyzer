@@ -1,6 +1,5 @@
 package com.mpecel.youtube.sentiment.analyzer;
 
-import com.mpecel.youtube.sentiment.analyzer.dto.newsapi.NewsApiResponse;
 import com.mpecel.youtube.sentiment.analyzer.service.NewsApiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
