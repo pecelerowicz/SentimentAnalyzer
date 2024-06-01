@@ -1,11 +1,9 @@
 package com.mpecel.youtube.sentiment.analyzer.repository.dto;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Document(collection = "newsApiResponses")
 public record NewsApiResponse(
         @Id
         String status,
