@@ -1,81 +1,63 @@
 package com.mpecel.youtube.sentiment.analyzer.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mpecel.youtube.sentiment.analyzer.dto.newsapi.NewsApiInfo;
-import com.mpecel.youtube.sentiment.analyzer.dto.newsapi.NewsApiResponse;
-import com.mpecel.youtube.sentiment.analyzer.dto.newsapi.NewsApiResponseSnippet;
-import com.mpecel.youtube.sentiment.analyzer.repository.NewsApiSavedResponseRepository;
-import com.mpecel.youtube.sentiment.analyzer.dto.newsapi.NewsApiResponseWrapper;
-import com.mpecel.youtube.sentiment.analyzer.repository.NewsApiFreshResponseRepository;
+import com.mpecel.youtube.sentiment.analyzer.model.Article;
+import com.mpecel.youtube.sentiment.analyzer.model.Snapshot;
+import com.mpecel.youtube.sentiment.analyzer.repository.NewsApiClientArticleRepository;
+import com.mpecel.youtube.sentiment.analyzer.repository.NewsApiClientRepository;
+import com.mpecel.youtube.sentiment.analyzer.repository.NewsApiClientSnapshotJpaRepository;
+import com.mpecel.youtube.sentiment.analyzer.repository.dto.NewsApiResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class NewsApiService {
 
-    private final NewsApiFreshResponseRepository newsApiFreshResponseRepository;
-    private final NewsApiSavedResponseRepository newsApiSavedResponseRepository;
+    private final NewsApiClientRepository newsApiClientRepository;
+    private final NewsApiClientSnapshotJpaRepository newsApiClientSnapshotJpaRepository;
+    private final NewsApiClientArticleRepository newsApiClientArticleRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${crypto.queries}")
     private String cryptoQueries;
 
     public NewsApiResponse getFreshResponse(String query) {
-        return getNewsApiResponse(newsApiFreshResponseRepository.getNews(query));
+        return newsApiClientRepository.getNews(query);
     }
 
-    // TODO napisać to ładniej
-    public NewsApiResponse getLastSavedResponse(String query) {
-        List<NewsApiResponseWrapper> wrappers = newsApiSavedResponseRepository.findByQuery(query);
-        List<NewsApiResponseWrapper> listOfWrappers = wrappers.stream().filter(w -> w.query().equals(query)).toList();
-        if(!listOfWrappers.isEmpty()) {
-            NewsApiResponseWrapper wrapper = listOfWrappers.getLast();
-            NewsApiResponse newsApiResponse = wrapper.newsApiResponse();
-            return newsApiResponse;
+    public void createSnapshot(String query) {
+        NewsApiResponse newsApiResponse = newsApiClientRepository.getNews(query);
+        List<Article> articles = newsApiResponse.articles().stream().map(Article::new).toList();
+
+        Snapshot snapshot = new Snapshot();
+        snapshot.setQuery(query);
+        snapshot.setTotalResults(newsApiResponse.totalResults());
+        snapshot.setQueryDate(LocalDateTime.now());
+
+        List<Article> existingOrNewArticles = new ArrayList<>();
+        for (Article article : articles) {
+            Optional<Article> existingArticle = newsApiClientArticleRepository
+                    .findByTitleAndDescriptionAndPublishedAt(article.getTitle(), article.getDescription(), article.getPublishedAt());
+            if (existingArticle.isPresent()) {
+                existingOrNewArticles.add(existingArticle.get());
+            } else {
+                existingOrNewArticles.add(article);
+            }
         }
-        return null;
+
+        snapshot.setArticles(existingOrNewArticles);
+        newsApiClientSnapshotJpaRepository.save(snapshot);
     }
 
-    public List<NewsApiResponseWrapper> getSavedResponses(String query) {
-        return newsApiSavedResponseRepository.findByQuery(query).stream().filter(w -> w.query().equals(query)).toList();
-    }
-
-    // todo implement
-    public List<NewsApiResponseSnippet> getSavedResponsesSnippets(String query) {
-        throw new RuntimeException("Not implemented yet");
-    }
-
-    public void updateSavedResponses(String query) {
-        NewsApiResponse freshResponse = getFreshResponse(query);
-        NewsApiResponseWrapper wrapper = new NewsApiResponseWrapper(null, query, new Date(), freshResponse);
-        newsApiSavedResponseRepository.save(wrapper);
-    }
-
-    // todo implement
-    public NewsApiInfo getInfo() {
-        throw new RuntimeException("Not implemented yet");
-    }
-
-    public void deleteSavedResponses() {
-        throw new RuntimeException("Uncomment to delete");
-        //        newsApiSavedResponseRepository.deleteAll();
-    }
-
-    public NewsApiService(NewsApiFreshResponseRepository newsApiFreshResponseRepository, NewsApiSavedResponseRepository newsApiSavedResponseRepository, ObjectMapper objectMapper) {
-        this.newsApiFreshResponseRepository = newsApiFreshResponseRepository;
-        this.newsApiSavedResponseRepository = newsApiSavedResponseRepository;
+    public NewsApiService(NewsApiClientRepository newsApiClientRepository, NewsApiClientSnapshotJpaRepository newsApiClientSnapshotJpaRepository, NewsApiClientArticleRepository newsApiClientArticleRepository, ObjectMapper objectMapper) {
+        this.newsApiClientRepository = newsApiClientRepository;
+        this.newsApiClientSnapshotJpaRepository = newsApiClientSnapshotJpaRepository;
+        this.newsApiClientArticleRepository = newsApiClientArticleRepository;
         this.objectMapper = objectMapper;
-    }
-
-    private NewsApiResponse getNewsApiResponse(String rawDataNews) {
-        try {
-            return objectMapper.readValue(rawDataNews, NewsApiResponse.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e); //TODO improve
-        }
     }
 }
