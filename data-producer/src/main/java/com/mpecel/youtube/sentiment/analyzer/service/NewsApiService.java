@@ -24,9 +24,6 @@ public class NewsApiService {
     private final NewsApiClientArticleRepository newsApiClientArticleRepository;
     private final ObjectMapper objectMapper;
 
-    @Value("${crypto.queries}")
-    private String cryptoQueries;
-
     public NewsApiResponse getFreshResponse(String query) {
         return newsApiClientRepository.getNews(query);
     }
