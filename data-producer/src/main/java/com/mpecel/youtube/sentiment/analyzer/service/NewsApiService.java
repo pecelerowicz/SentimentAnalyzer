@@ -9,6 +9,7 @@ import com.mpecel.youtube.sentiment.analyzer.repository.NewsApiClientSnapshotJpa
 import com.mpecel.youtube.sentiment.analyzer.repository.dto.NewsApiResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class NewsApiService {
         return newsApiClientRepository.getNews(query);
     }
 
+    @Transactional
     public void createSnapshot(String query) {
         NewsApiResponse newsApiResponse = newsApiClientRepository.getNews(query);
         List<Article> articles = newsApiResponse.articles().stream().map(Article::new).toList();

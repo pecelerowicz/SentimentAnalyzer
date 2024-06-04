@@ -11,8 +11,13 @@
 	<groupId>com.mpecel.youtube.sentiment</groupId>
 	<artifactId>analyzer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
 	<name>analyzer</name>
 	<description>YouTube sentiment analyzer</description>
+	<modules>
+		<module>data-producer</module>
+		<module>analytics</module>
+	</modules>
 	<properties>
 		<java.version>22</java.version>
 	</properties>

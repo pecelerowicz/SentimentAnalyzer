@@ -3,20 +3,22 @@ package com.mpecel.youtube.sentiment.analyzer;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.sql.DataSource;
 
 @SpringBootApplication
-public class AnalyzerApplication implements CommandLineRunner {
+@EnableScheduling
+public class ProducerApplication implements CommandLineRunner {
 
 	private final DataSource dataSource;
 
-	public AnalyzerApplication(DataSource dataSource) {
+	public ProducerApplication(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
 	public static void main(String[] args) {
-		SpringApplication.run(AnalyzerApplication.class, args);
+		SpringApplication.run(ProducerApplication.class, args);
 	}
 
 	@Override

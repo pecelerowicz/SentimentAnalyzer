@@ -44,7 +44,8 @@ public class NewsApiClientRepository {
             String body = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
 
             try {
-                return objectMapper.readValue(body, NewsApiResponse.class);
+                NewsApiResponse newsApiResponse = objectMapper.readValue(body, NewsApiResponse.class);
+                return newsApiResponse;
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e); //TODO improve
             }

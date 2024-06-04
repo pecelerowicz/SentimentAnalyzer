@@ -1,4 +1,4 @@
-//package com.mpecel.youtube.sentiment.analyzer.model;
+package com.mpecel.youtube.sentiment.analyzer.model;//package com.mpecel.youtube.sentiment.analyzer.model;
 //
 //import com.mpecel.youtube.sentiment.analyzer.repository.dto.NewsApiResponse;
 //import jakarta.persistence.*;
