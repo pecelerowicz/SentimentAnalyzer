@@ -20,7 +20,7 @@ public class CreateSnapshotTask {
         this.newsApiService = newsApiService;
     }
 
-    @Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRate = 7200000)
     public void createNewSnapshot() {
         System.out.println("updating:");
         System.out.println(LocalDateTime.now());
