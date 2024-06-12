@@ -23,6 +23,7 @@ public class ProducerApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+
 //		try (Connection conn = dataSource.getConnection();
 //			 Statement stmt = conn.createStatement()) {
 //			// Wipe out existing data
