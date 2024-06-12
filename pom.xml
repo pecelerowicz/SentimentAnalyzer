@@ -17,7 +17,8 @@
 	<modules>
 		<module>data-producer</module>
 		<module>analytics</module>
-	</modules>
+        <module>playground</module>
+    </modules>
 	<properties>
 		<java.version>22</java.version>
 	</properties>
