@@ -60,6 +60,9 @@ public class NewsApiClientRepository {
                     .build();
 
             String body = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
+            if(body.contains("error") && body.contains("You have made too many requests recently")) {
+                throw new RuntimeException("You have made too many requests recently");
+            }
 
             try {
                 NewsApiResponse newsApiResponse = objectMapper.readValue(body, NewsApiResponse.class);
