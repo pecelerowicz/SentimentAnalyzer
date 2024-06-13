@@ -2,5 +2,5 @@ package com.mpecel.youtube.sentiment.analyzer.dto;
 
 import java.util.List;
 
-public record ArticlesResponse(List<ArticleResponse> articleResponses) {
+public record ArticlesResponse(List<ArticleResponse> articleResponses, int numberOfArticles) {
 }

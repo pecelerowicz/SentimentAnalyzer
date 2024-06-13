@@ -4,13 +4,13 @@ import com.mpecel.youtube.sentiment.analyzer.dto.ArticleResponse;
 import com.mpecel.youtube.sentiment.analyzer.dto.ArticlesResponse;
 import com.mpecel.youtube.sentiment.analyzer.model.Article;
 import com.mpecel.youtube.sentiment.analyzer.model.Snapshot;
-import com.mpecel.youtube.sentiment.analyzer.repository.ArticleRepository;
 import com.mpecel.youtube.sentiment.analyzer.repository.SnapshotRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,17 +21,14 @@ import java.util.stream.Collectors;
 public class NewsApiService {
 
     private final SnapshotRepository snapshotRepository;
-    private final ArticleRepository articleRepository;
 
-    public NewsApiService(SnapshotRepository snapshotRepository, ArticleRepository articleRepository) {
+    public NewsApiService(SnapshotRepository snapshotRepository) {
         this.snapshotRepository = snapshotRepository;
-        this.articleRepository = articleRepository;
     }
 
-    List<ArticleResponse> articleResponseList = new LinkedList<>();
-
     @Transactional
-    public ArticlesResponse getAllArticles(String query) {
+    public ArticlesResponse getAllArticles(String query, String publishedFrom, String publishedTo) {
+        List<ArticleResponse> articleResponseList = new LinkedList<>();
         List<Snapshot> querySnapshots = snapshotRepository.findAll().stream().filter(s -> s.getQuery().equals(query)).sorted().toList();
 
         Set<Article> queryArticles = new HashSet<>();
@@ -46,9 +43,20 @@ public class NewsApiService {
                 .map(Snapshot::getQueryDate)
                 .toList();
 
-        List<Article> queryArticlesSorted = queryArticles.stream().sorted().toList();
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+        ZonedDateTime fromDate = publishedFrom != null ? ZonedDateTime.parse(publishedFrom, formatter) : null;
+        ZonedDateTime toDate = publishedTo != null ? ZonedDateTime.parse(publishedTo, formatter) : null;
+        List<Article> queryArticlesSortedFiltered = queryArticles
+                .stream()
+                .filter(article -> {
+                    ZonedDateTime publishedAt = ZonedDateTime.parse(article.getPublishedAt(), formatter);
+                    boolean afterFromDate = fromDate == null || !publishedAt.isBefore(fromDate);
+                    boolean beforeToDate = toDate == null || !publishedAt.isAfter(toDate);
+                    return afterFromDate && beforeToDate;
+                })
+                .sorted().toList();
 
-        queryArticlesSorted.forEach(a -> {
+        queryArticlesSortedFiltered.forEach(a -> {
             List<LocalDateTime> articleQuerySnapshotDates = a.getSnapshots()
                     .stream()
                     .sorted()
@@ -64,12 +72,12 @@ public class NewsApiService {
             long id = a.getId();
             String title = a.getTitle();
             String url = a.getUrl();
-            LocalDateTime publishedAt = ZonedDateTime.parse(a.getPublishedAt()).toLocalDateTime();
+            ZonedDateTime publishedAt = ZonedDateTime.parse(a.getPublishedAt(), formatter);
             articleResponseList.add(new ArticleResponse(id, title, url, publishedAt, querySnapshotDates,
                     articleQuerySnapshotDates, allQueriesOfArticle));
         });
 
-        return new ArticlesResponse(articleResponseList);
+        return new ArticlesResponse(articleResponseList, articleResponseList.size());
     }
 
     private Set<Article> union(Set<Article> set1, Set<Article> set2) {
