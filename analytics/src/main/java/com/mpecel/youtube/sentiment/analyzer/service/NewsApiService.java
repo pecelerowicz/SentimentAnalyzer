@@ -9,12 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,21 +78,41 @@ public class NewsApiService {
         return new ArticlesResponse(articleResponseList, articleResponseList.size());
     }
 
-    private Set<Article> union(Set<Article> set1, Set<Article> set2) {
-        Set<Article> unionSet = new HashSet<>(set1);
-        unionSet.addAll(set2);
-        return unionSet;
+    @Transactional
+    public ArticlesResponse getAllArticlesByZoneDate(String query, String countryOfZone,
+                                                     LocalDateTime publishedFromDate, LocalDateTime publishedToDate) {
+
+        ZoneId zoneId = getZoneIdForCountry(countryOfZone);
+
+        String publishedFromZoned = null;
+        String publishedToZoned = null;
+
+        if (publishedFromDate != null) {
+            publishedFromZoned = publishedFromDate.atZone(zoneId).withZoneSameInstant(ZoneId.of("UTC")).toString();
+        }
+
+        if (publishedToDate != null) {
+            publishedToZoned = publishedToDate.atZone(zoneId).withZoneSameInstant(ZoneId.of("UTC")).toString();
+        }
+
+        return getAllArticles(query, publishedFromZoned, publishedToZoned);
     }
 
-    private Set<Article> intersection(Set<Article> set1, Set<Article> set2) {
-        Set<Article> intersectionSet = new HashSet<>(set1);
-        intersectionSet.retainAll(set2);
-        return intersectionSet;
-    }
+    private ZoneId getZoneIdForCountry(String countryOfZone) {
+        Map<String, String> countryZoneMap = new HashMap<>();
+        countryZoneMap.put("USA_Eastern", "America/New_York");
+        countryZoneMap.put("USA_Central", "America/Chicago");
+        countryZoneMap.put("USA_Mountain", "America/Denver");
+        countryZoneMap.put("USA_Pacific", "America/Los_Angeles");
+        countryZoneMap.put("UK", "Europe/London");
+        countryZoneMap.put("Poland", "Europe/Warsaw");
+        countryZoneMap.put("Zulu", "UTC");
+        countryZoneMap.put("UTC", "UTC");
 
-    private Set<Article> difference(Set<Article> set1, Set<Article> set2) {
-        Set<Article> differenceSet = new HashSet<>(set1);
-        differenceSet.removeAll(set2);
-        return differenceSet;
+        String zoneId = countryZoneMap.get(countryOfZone);
+        if (zoneId == null) {
+            throw new RuntimeException("Country not found: " + countryOfZone);
+        }
+        return ZoneId.of(zoneId);
     }
 }
