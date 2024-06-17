@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres-for-compose:
+    image: postgres:latest
+    container_name: postgres-for-compose
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: mpecel
+      POSTGRES_PASSWORD: mpecel_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - analyzer-network
+
+  data-producer:
+    image: data-producer:latest
+    container_name: data-producer
+    environment:
+      API_NEWSAPI_KEY: ${API_NEWSAPI_KEY}
+    depends_on:
+      - postgres-for-compose
+    networks:
+      - analyzer-network
+
+  analytics:
+    image: analytics:latest
+    container_name: analytics
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres-for-compose
+    networks:
+      - analyzer-network
+
+  playground:
+    image: playground:latest
+    container_name: playground
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres-for-compose
+    networks:
+      - analyzer-network
+
+volumes:
+  postgres_data:
+
+networks:
+  analyzer-network:
