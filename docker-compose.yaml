@@ -16,7 +16,7 @@ services:
       - analyzer-network
 
   data-producer:
-    image: data-producer:latest
+    image: data-producer:${VERSION}
     container_name: data-producer
     environment:
       API_NEWSAPI_KEY: ${API_NEWSAPI_KEY}
@@ -26,7 +26,7 @@ services:
       - analyzer-network
 
   analytics:
-    image: analytics:latest
+    image: analytics:${VERSION}
     container_name: analytics
     ports:
       - "8081:8081"
@@ -36,7 +36,7 @@ services:
       - analyzer-network
 
   playground:
-    image: playground:latest
+    image: playground:${VERSION}
     container_name: playground
     ports:
       - "8082:8082"
